@@ -153,10 +153,8 @@ export class NativeConnection {
 
     public readMessage<T = any>(timeoutMs?: number): Promise<T> {
         return new Promise<T>((resolve, reject) => {
-            this._readQueue.push(resolve);
-
             if (timeoutMs) {
-                setTimeout(() => {
+                const timeoutId = setTimeout(() => {
                     const index = this._readQueue.indexOf(resolve);
                     if (index >= 0) {
                         this._readQueue.splice(index, 1);
@@ -164,6 +162,13 @@ export class NativeConnection {
 
                     reject("Timeout reached");
                 }, timeoutMs);
+
+                this._readQueue.push(x => {
+                    clearTimeout(timeoutId);
+                    resolve(x);
+                });
+            } else {
+                this._readQueue.push(resolve);
             }
 
             // Try processing the queue immediately since messages may have been queued
