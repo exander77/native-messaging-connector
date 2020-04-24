@@ -6,19 +6,33 @@ import {NativeConnection} from "./NativeConnection";
 
 export enum ManifestSearchLocation {
     Firefox = 1 << 0,
-    All = Firefox,
+    Chrome = 1 << 1,
+    Chromium = 1 << 2,
+    Vivaldi = 1 << 3,
+    All = 64 - 1,
 }
 
 export enum NativeAppType {
-    Firefox
+    Firefox,
+    Chrome,
+    Chromium,
+    Vivaldi
 }
 
 function* getManifestLocations(search_location: ManifestSearchLocation): Generator<[string, NativeAppType]> {
     if (os.platform() == "linux") {
         if (search_location & ManifestSearchLocation.Firefox) {
             yield ["/usr/lib/mozilla/native-messaging-hosts/", NativeAppType.Firefox];
-
             yield [path.join(process.env.HOME, ".mozilla/native-messaging-hosts/"), NativeAppType.Firefox];
+        }
+        if (search_location & ManifestSearchLocation.Chrome) {
+            yield ["/etc/opt/chrome/native-messaging-hosts", NativeAppType.Chrome];
+        }
+        if (search_location & ManifestSearchLocation.Chromium) {
+            yield ["/etc/chromium/native-messaging-hosts", NativeAppType.Chromium];
+        }
+        if (search_location & ManifestSearchLocation.Vivaldi) {
+            yield [path.join(process.env.HOME, ".config/vivaldi/NativeMessagingHosts"), NativeAppType.Vivaldi];
         }
     }
 }
