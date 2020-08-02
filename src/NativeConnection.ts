@@ -142,7 +142,7 @@ export class NativeConnection {
 
     public async sendMessage(message: any) {
         const jsonContent = JSON.stringify(message, null, 0);
-        const messageLen = jsonContent.length;
+        const messageLen = Buffer.byteLength(jsonContent, 'utf8');
 
         const messageBuffer = Buffer.alloc(messageLen + 4);
         writeUint32(messageBuffer, messageLen, 0);
